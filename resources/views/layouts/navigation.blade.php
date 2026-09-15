@@ -4,9 +4,13 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="font-bold text-lg text-gray-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-neon-purple dark:to-neon-pink">
-                        EDESSI
+                <div class="shrink-0 flex items-center gap-2">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('images/logo-edessi.jpg') }}" alt="EDESSI" class="w-9 h-9 rounded-lg dark:hidden">
+                        <img src="{{ asset('images/logo-edessi-oscuro.jpg') }}" alt="EDESSI" class="w-9 h-9 rounded-lg hidden dark:block">
+                        <span class="font-bold text-lg text-edessi-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-edessi-400 dark:to-acento-500">
+                            EDESSI
+                        </span>
                     </a>
                 </div>
 
@@ -120,7 +124,7 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-noche-bg focus:outline-none focus:bg-gray-100 dark:focus:bg-noche-bg focus:text-gray-500 dark:focus:text-white transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -163,10 +167,10 @@
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
+        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-noche-border">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->nombre }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }} — {{ ucfirst(Auth::user()->rol) }}</div>
+                <div class="font-medium text-base text-gray-800 dark:text-white">{{ Auth::user()->nombre }}</div>
+                <div class="font-medium text-sm text-gray-500 dark:text-gray-400">{{ Auth::user()->email }} — {{ ucfirst(Auth::user()->rol) }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

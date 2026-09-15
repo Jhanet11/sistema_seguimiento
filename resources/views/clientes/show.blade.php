@@ -6,7 +6,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">C.I. {{ $cliente->ci }}</p>
             </div>
             <a href="{{ route('clientes.historial.pdf', $cliente) }}"
-               class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 text-sm">
+               class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 text-sm">
                 Descargar historial PDF
             </a>
         </div>
@@ -47,7 +47,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <span class="px-2 py-1 rounded-full text-xs
-                                            {{ $r->estado === 'entregado' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-noche-bg dark:text-neon-pink' }}">
+                                            {{ $r->estado === 'entregado' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-noche-bg dark:text-acento-500' }}">
                                             {{ ucfirst($r->estado) }}
                                         </span>
                                         <svg :class="abierto ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,7 +84,7 @@
                                         </div>
                                     @endif
 
-                                    <a href="{{ route('reparaciones.show', $r) }}" class="text-edessi-600 dark:text-neon-cyan text-xs hover:underline inline-block mt-1">
+                                    <a href="{{ route('reparaciones.show', $r) }}" class="text-edessi-600 dark:text-edessi-400 text-xs hover:underline inline-block mt-1">
                                         Ver reparación completa →
                                     </a>
                                 </div>

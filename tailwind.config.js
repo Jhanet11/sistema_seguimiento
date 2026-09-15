@@ -17,28 +17,27 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             colors: {
+                // Paleta principal EDESSI (tomada del logo oficial)
                 edessi: {
-                    50: '#EAF1F8',
-                    100: '#CFE0EF',
-                    600: '#0C447C',
-                    700: '#0A3A6B',
-                    800: '#082E55',
+                    50: '#EAF2FA',
+                    100: '#CDE3F4',
+                    400: '#4C96D6',
+                    500: '#2C7BC2',
+                    600: '#1B6FB5',
+                    700: '#15568D',
+                    800: '#0B2E5E',
+                    900: '#081F40',
                 },
                 acento: {
                     100: '#FAEEDA',
                     500: '#EF9F27',
                     600: '#D98A16',
                 },
-                // Paleta modo oscuro (inspirada en dashboard tipo CRM)
+                // Modo oscuro: negro + azul del logo (versión "fondo negro")
                 noche: {
-                    bg: '#12142B',
-                    surface: '#1B1E3D',
-                    border: '#2A2E55',
-                },
-                neon: {
-                    purple: '#8B5CF6',
-                    pink: '#EC4899',
-                    cyan: '#22D3EE',
+                    bg: '#0A0A0F',
+                    surface: '#15161D',
+                    border: '#262832',
                 },
             },
         },

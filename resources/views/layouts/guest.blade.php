@@ -19,6 +19,27 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>
+            @keyframes flotar {
+                0%, 100% { transform: translate(0, 0); }
+                50% { transform: translate(20px, -20px); }
+            }
+            @keyframes aparecer {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes sacudir {
+                0%, 100% { transform: translateX(0); }
+                20%, 60% { transform: translateX(-8px); }
+                40%, 80% { transform: translateX(8px); }
+            }
+            .blob-flotante { animation: flotar 10s ease-in-out infinite; }
+            .blob-flotante-lenta { animation: flotar 14s ease-in-out infinite reverse; }
+            .aparecer { animation: aparecer 0.5s ease-out; }
+            .aparecer-tardio { animation: aparecer 0.5s ease-out 0.15s both; }
+            .sacudir { animation: sacudir 0.4s ease-in-out; }
+        </style>
     </head>
     <body class="font-sans antialiased">
 
@@ -26,13 +47,13 @@
                     bg-gradient-to-br from-edessi-50 via-white to-acento-100
                     dark:from-noche-bg dark:via-noche-bg dark:to-noche-bg">
 
-            <!-- Formas decorativas de fondo, difuminadas -->
-            <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-40
-                        bg-edessi-600 dark:bg-neon-purple dark:opacity-30"></div>
-            <div class="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-30
-                        bg-acento-500 dark:bg-neon-pink dark:opacity-25"></div>
-            <div class="absolute top-1/3 right-0 w-72 h-72 rounded-full blur-3xl opacity-20
-                        bg-edessi-600 dark:bg-neon-cyan dark:opacity-20"></div>
+            <!-- Formas decorativas de fondo, difuminadas y con movimiento sutil -->
+            <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-40 blob-flotante
+                        bg-edessi-600 dark:bg-edessi-800 dark:opacity-30"></div>
+            <div class="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-30 blob-flotante-lenta
+                        bg-acento-500 dark:bg-acento-500 dark:opacity-25"></div>
+            <div class="absolute top-1/3 right-0 w-72 h-72 rounded-full blur-3xl opacity-20 blob-flotante
+                        bg-edessi-600 dark:bg-edessi-400 dark:opacity-20"></div>
 
             <!-- Botón de modo oscuro flotante -->
             <div class="absolute top-6 right-6 z-10"
@@ -55,18 +76,17 @@
             </div>
 
             <!-- Logo / marca -->
-            <div class="relative z-10 mb-6 text-center">
-                <span class="text-3xl font-bold tracking-tight text-edessi-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-neon-purple dark:to-neon-pink">
-                    EDESSI
-                </span>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Sistema de seguimiento y reparación de equipos
-                </p>
+            <div class="relative z-10 mb-4 text-center aparecer">
+                <img src="{{ asset('images/logo-edessi.jpg') }}" alt="EDESSI"
+                     class="w-32 h-32 mx-auto rounded-2xl shadow-lg dark:hidden">
+                <img src="{{ asset('images/logo-edessi-oscuro.jpg') }}" alt="EDESSI"
+                     class="w-32 h-32 mx-auto rounded-2xl shadow-lg hidden dark:block">
             </div>
 
             <!-- Tarjeta del formulario -->
             <div class="relative z-10 w-full sm:max-w-md px-8 py-8 bg-white/90 dark:bg-noche-surface/90 backdrop-blur
-                        shadow-xl rounded-2xl border border-white/50 dark:border-noche-border">
+                        shadow-xl rounded-2xl border border-white/50 dark:border-noche-border
+                        aparecer-tardio {{ $errors->any() ? 'sacudir' : '' }}">
                 {{ $slot }}
             </div>
 

@@ -20,7 +20,7 @@
                 <div class="flex justify-between items-center mb-4 gap-4">
                     @if (auth()->user()->esAdmin())
                         <a href="{{ route('reparaciones.create') }}"
-                           class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 whitespace-nowrap">
+                           class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 whitespace-nowrap transition-all duration-150 hover:shadow-md active:scale-95">
                             + Registrar ingreso de equipo
                         </a>
                     @endif
@@ -50,11 +50,11 @@
                                 <td class="py-2 pr-4 dark:text-gray-200">{{ $r->equipo->cliente->nombre ?? '-' }}</td>
                                 <td class="py-2 pr-4 dark:text-gray-200">{{ $r->tecnico->nombre ?? 'Sin asignar' }}</td>
                                 <td class="py-2 pr-4">
-                                    <span class="px-2 py-1 rounded text-xs bg-gray-100 dark:bg-noche-bg dark:text-neon-cyan">{{ ucfirst($r->estado) }}</span>
+                                    <span class="px-2 py-1 rounded text-xs bg-gray-100 dark:bg-noche-bg dark:text-edessi-400">{{ ucfirst($r->estado) }}</span>
                                 </td>
                                 <td class="py-2 pr-4 dark:text-gray-200">{{ $r->fecha_ingreso->format('d/m/Y') }}</td>
                                 <td class="py-2 pr-4 space-x-2">
-                                    <a href="{{ route('reparaciones.show', $r) }}" class="text-edessi-600 dark:text-neon-cyan hover:underline">Ver</a>
+                                    <a href="{{ route('reparaciones.show', $r) }}" class="text-edessi-600 dark:text-edessi-400 hover:underline">Ver</a>
 
                                     @if (auth()->user()->esTecnico() && $r->estaSinAsignar())
                                         <form action="{{ route('reparaciones.autoasignar', $r) }}" method="POST" class="inline">

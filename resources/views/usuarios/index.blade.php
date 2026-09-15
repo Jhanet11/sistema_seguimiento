@@ -17,7 +17,7 @@
 
                 <div class="flex justify-between items-center mb-4 gap-4">
                     <a href="{{ route('usuarios.create') }}"
-                       class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 whitespace-nowrap">
+                       class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 whitespace-nowrap transition-all duration-150 hover:shadow-md active:scale-95">
                         + Crear usuario
                     </a>
 

@@ -23,22 +23,33 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-noche-bg">
-            @include('layouts.navigation')
+        <div class="relative min-h-screen overflow-x-hidden
+                    bg-gradient-to-br from-edessi-50 via-gray-50 to-acento-100
+                    dark:from-noche-bg dark:via-noche-bg dark:to-noche-bg">
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-noche-surface shadow dark:border-b dark:border-noche-border">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <!-- Formas decorativas de fondo, difuminadas y fijas -->
+            <div class="fixed -top-40 -left-40 w-96 h-96 rounded-full blur-3xl opacity-30 pointer-events-none
+                        bg-edessi-400 dark:bg-edessi-800 dark:opacity-25"></div>
+            <div class="fixed top-1/2 -right-40 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none
+                        bg-acento-500 dark:bg-edessi-600 dark:opacity-20"></div>
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+            <div class="relative z-10">
+                @include('layouts.navigation')
+
+                <!-- Page Heading -->
+                @isset($header)
+                    <header class="bg-white/80 dark:bg-noche-surface/80 backdrop-blur shadow-sm dark:border-b dark:border-noche-border">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endisset
+
+                <!-- Page Content -->
+                <main>
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>

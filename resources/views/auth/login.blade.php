@@ -4,7 +4,7 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ingresa tus datos para continuar</p>
     </div>
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+    <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ enviando: false }" @submit="enviando = true">
         @csrf
 
         <!-- Email o C.I. -->
@@ -12,7 +12,8 @@
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo o C.I.</label>
             <input id="email" type="text" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
                    class="mt-1 block w-full rounded-xl border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white
-                          focus:border-edessi-600 focus:ring-edessi-600 dark:focus:border-neon-cyan dark:focus:ring-neon-cyan
+                          transition-shadow duration-200
+                          focus:border-edessi-600 focus:ring-2 focus:ring-edessi-600/40 dark:focus:border-edessi-400 dark:focus:ring-edessi-400/40
                           shadow-sm py-2.5 px-4">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -28,12 +29,13 @@
                        required
                        autocomplete="current-password"
                        class="block w-full rounded-xl border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white
-                              focus:border-edessi-600 focus:ring-edessi-600 dark:focus:border-neon-cyan dark:focus:ring-neon-cyan
+                              transition-shadow duration-200
+                              focus:border-edessi-600 focus:ring-2 focus:ring-edessi-600/40 dark:focus:border-edessi-400 dark:focus:ring-edessi-400/40
                               shadow-sm py-2.5 px-4 pr-11">
 
                 <button type="button"
                         @click="show = !show"
-                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                         tabindex="-1">
                     <svg x-show="!show" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -53,22 +55,29 @@
         <div class="flex items-center justify-between">
             <label for="remember_me" class="inline-flex items-center">
                 <input id="remember_me" type="checkbox" name="remember"
-                       class="rounded border-gray-300 dark:border-noche-border text-edessi-600 dark:text-neon-pink shadow-sm focus:ring-edessi-600 dark:focus:ring-neon-pink">
+                       class="rounded border-gray-300 dark:border-noche-border text-edessi-600 dark:text-acento-500 shadow-sm focus:ring-edessi-600 dark:focus:ring-acento-500">
                 <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Recordarme</span>
             </label>
 
             @if (Route::has('password.request'))
-                <a class="text-sm text-edessi-600 dark:text-neon-cyan hover:underline" href="{{ route('password.request') }}">
+                <a class="text-sm text-edessi-600 dark:text-edessi-400 hover:underline" href="{{ route('password.request') }}">
                     ¿Olvidaste tu contraseña?
                 </a>
             @endif
         </div>
 
         <button type="submit"
-                class="w-full py-2.5 rounded-xl text-white font-medium shadow-sm transition
-                       bg-gradient-to-r from-edessi-600 to-edessi-700 hover:opacity-90
-                       dark:from-neon-purple dark:to-neon-pink">
-            Iniciar sesión
+                :disabled="enviando"
+                class="w-full py-2.5 rounded-xl text-white font-medium shadow-sm transition-all duration-150
+                       bg-gradient-to-r from-edessi-600 to-edessi-700 hover:opacity-90 hover:shadow-md active:scale-[0.98]
+                       dark:from-edessi-800 dark:to-acento-500
+                       disabled:opacity-70 disabled:cursor-not-allowed
+                       flex items-center justify-center gap-2">
+            <svg x-show="enviando" x-cloak class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span x-text="enviando ? 'Ingresando...' : 'Iniciar sesión'"></span>
         </button>
     </form>
 </x-guest-layout>

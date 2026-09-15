@@ -17,7 +17,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-4">
+                <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-4" x-data="{ enviando: false }" @submit="enviando = true">
                     @csrf
 
                     <div>
@@ -44,9 +44,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mínimo 6 caracteres. El usuario podrá cambiarla luego desde su perfil.</p>
                     </div>
 
-                    <button class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90">
-                        Crear usuario
-                    </button>
+                    <x-boton-enviar texto="Crear usuario" textoEnviando="Creando..." />
                 </form>
 
             </div>

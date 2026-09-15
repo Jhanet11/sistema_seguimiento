@@ -17,7 +17,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('clientes.store') }}" method="POST" class="space-y-4" x-data="{ crearAcceso: false }">
+                <form action="{{ route('clientes.store') }}" method="POST" class="space-y-4" x-data="{ crearAcceso: false, enviando: false }" @submit="enviando = true">
                     @csrf
 
                     <div>
@@ -59,9 +59,7 @@
                         </p>
                     </div>
 
-                    <button class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90">
-                        Registrar
-                    </button>
+                    <x-boton-enviar texto="Registrar" textoEnviando="Registrando..." />
                 </form>
 
             </div>

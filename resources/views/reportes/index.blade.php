@@ -44,7 +44,7 @@
                         </select>
                     </div>
 
-                    <button class="px-4 py-2 bg-edessi-600 dark:bg-neon-pink text-white rounded hover:bg-edessi-700 dark:hover:opacity-90">
+                    <button class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90">
                         Generar PDF
                     </button>
                 </form>
