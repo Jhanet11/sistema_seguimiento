@@ -6,96 +6,99 @@ use App\Models\Cliente;
 use App\Models\Usuario;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ClienteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = Cliente::with('usuario')->latest()->get();
-        return view('clientes.index', compact('clientes'));
+        $q = Cliente::withCount('equipos');
+        if ($request->filled('q')) {
+            $q->where(fn ($q) => $q->where('nombre', 'like', '%'.$request->q.'%')->orWhere('ci', 'like', '%'.$request->q.'%')->orWhere('telefono', 'like', '%'.$request->q.'%'));
+        }
+
+        return view('clientes.index', ['clientes' => $q->latest('id')->paginate(12)->withQueryString()]);
     }
 
     public function create()
     {
-        return view('clientes.create');
+        return view('clientes.create', ['cliente' => new Cliente]);
     }
 
-    // Admin registra cliente y opcionalmente le crea su cuenta de acceso (login = C.I.)
+    public function edit(Cliente $cliente)
+    {
+        return view('clientes.create', compact('cliente'));
+    }
+
+    private function validar(Request $request, ?Cliente $cliente = null): array
+    {
+        return $request->validate(['nombre' => 'required|string|max:255', 'ci' => ['required', 'string', 'max:30', Rule::unique('clientes', 'ci')->ignore($cliente?->id), Rule::unique('usuarios', 'email')->ignore($cliente?->usuario_id)], 'telefono' => 'nullable|string|max:30', 'direccion' => 'nullable|string|max:255', 'correo_notificacion' => 'nullable|email|max:255', 'crear_acceso' => ['sometimes','boolean',Rule::prohibitedIf(!$request->user()->esAdmin())], 'acceso_activo'=>['sometimes','boolean',Rule::prohibitedIf(!$request->user()->esAdmin())], 'password' => [Rule::prohibitedIf(!$request->user()->esAdmin()), Rule::requiredIf($request->boolean('crear_acceso') && ! $cliente?->usuario_id), 'nullable', 'string', 'min:8', 'confirmed']]);
+    }
+
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nombre' => 'required|string',
-            'ci' => 'required|string|unique:clientes,ci',
-            'telefono' => 'nullable|string',
-            'direccion' => 'nullable|string',
-            'correo_notificacion' => 'nullable|email',
-            'crear_acceso' => 'boolean',
-        ]);
+        return $this->guardar($request, new Cliente);
+    }
 
-        $usuarioId = null;
+    public function update(Request $request, Cliente $cliente)
+    {
+        return $this->guardar($request, $cliente);
+    }
 
-        if (! empty($data['crear_acceso'])) {
-            $usuario = Usuario::create([
-                'nombre' => $data['nombre'],
-                'email' => $data['ci'], // el C.I. funciona como usuario de acceso
-                'password' => Hash::make('password'), // el cliente debe cambiarla luego
-                'rol' => 'cliente',
-            ]);
-            $usuarioId = $usuario->id;
-        }
+    private function guardar(Request $request, Cliente $cliente)
+    {
+        $data = $this->validar($request, $cliente);
+        DB::transaction(function () use ($data, $cliente) {
+            $usuario = $cliente->usuario;
+            if (! $usuario && ! empty($data['crear_acceso'])) {
+                $usuario = Usuario::create(['nombre' => $data['nombre'], 'email' => $data['ci'], 'password' => $data['password'], 'rol' => 'cliente']);
+            } elseif ($usuario) {
+                $usuario->update(['nombre' => $data['nombre'], 'email' => $data['ci']]);
+                if (! empty($data['password'])) {
+                    $usuario->update(['password' => $data['password']]);
+                }
+            }
+            if ($usuario && array_key_exists('acceso_activo',$data)) $usuario->update(['activo'=>$data['acceso_activo']]);
+            $cliente->fill(collect($data)->except(['crear_acceso', 'password', 'acceso_activo'])->all());
+            $cliente->usuario_id = $usuario?->id;
+            $cliente->save();
+        });
 
-        Cliente::create([
-            'usuario_id' => $usuarioId,
-            'nombre' => $data['nombre'],
-            'ci' => $data['ci'],
-            'telefono' => $data['telefono'] ?? null,
-            'direccion' => $data['direccion'] ?? null,
-            'correo_notificacion' => $data['correo_notificacion'] ?? null,
-        ]);
-
-        return redirect()->route('clientes.index')->with('success', 'Cliente registrado.');
+        return redirect()->route('clientes.show', $cliente)->with('success', 'Datos del cliente guardados correctamente.');
     }
 
     public function show(Cliente $cliente)
     {
-        $cliente->load('equipos.reparaciones.tecnico', 'equipos.reparaciones.observaciones', 'equipos.reparaciones.repuestos');
-
-        // Todas las reparaciones de todos sus equipos, juntas y ordenadas de más reciente a más antigua
-        $todasReparaciones = $cliente->equipos
-            ->flatMap(fn ($equipo) => $equipo->reparaciones->map(function ($r) use ($equipo) {
-                $r->setRelation('equipo', $equipo);
-                return $r;
-            }))
-            ->sortByDesc('fecha_ingreso');
-
-        // Agrupadas por mes/año, como un estado de cuenta (ej: "Agosto 2026")
-        $historialPorMes = $todasReparaciones->groupBy(function ($r) {
-            return $r->fecha_ingreso->translatedFormat('F Y');
-        });
+        $cliente->load('equipos.reparaciones.tecnico');
+        $historialPorMes = $cliente->equipos->flatMap(fn ($e) => $e->reparaciones)->sortByDesc('fecha_ingreso')->groupBy(fn ($r) => $r->fecha_ingreso->translatedFormat('F Y'));
 
         return view('clientes.show', compact('cliente', 'historialPorMes'));
     }
 
-    // Descarga en PDF el historial completo de reparaciones de un cliente
-   public function historialPdf(Cliente $cliente)
+    public function historialPdf(Cliente $cliente)
     {
         $cliente->load('equipos.reparaciones.tecnico', 'equipos.reparaciones.observaciones', 'equipos.reparaciones.repuestos');
+        $reparaciones = $cliente->equipos->flatMap(fn ($e) => $e->reparaciones->map(function ($r) use ($e, $cliente) {
+            $r->setRelation('equipo', $e->setRelation('cliente', $cliente));
 
-        // AGREGADO $cliente en el 'use ($equipo, $cliente)'
-        $reparaciones = $cliente->equipos
-            ->flatMap(fn ($equipo) => $equipo->reparaciones->map(function ($r) use ($equipo, $cliente) {
-                $r->setRelation('equipo', $equipo->setRelation('cliente', $cliente));
-                return $r;
-            }))
-            ->sortByDesc('fecha_ingreso');
+            return $r;
+        }))->sortByDesc('fecha_ingreso');
 
-        $pdf = Pdf::loadView('clientes.historial-pdf', [
-            'cliente' => $cliente,
-            'reparaciones' => $reparaciones,
-            'fechaGeneracion' => now(),
-        ]);
+        return Pdf::loadView('clientes.historial-pdf', ['cliente' => $cliente, 'reparaciones' => $reparaciones, 'fechaGeneracion' => now()])->download('historial-'.$cliente->id.'.pdf');
+    }
 
-        return $pdf->download('historial_'.\Illuminate\Support\Str::slug($cliente->nombre).'.pdf');
+    public function destroy(Cliente $cliente)
+    {
+        if ($cliente->equipos()->exists()) {
+            return back()->with('error', 'El cliente tiene equipos asociados. Su historial debe conservarse.');
+        }
+        DB::transaction(function () use ($cliente) {
+            $usuario = $cliente->usuario;
+            $cliente->delete();
+            $usuario?->delete();
+        });
+
+        return redirect()->route('clientes.index')->with('success','Cliente sin equipos eliminado.');
     }
 }

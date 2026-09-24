@@ -6,7 +6,6 @@ use App\Mail\EquipoListoMail;
 use App\Models\Reparacion;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 
 class EquipoListoNotification extends Notification
 {
@@ -24,9 +23,7 @@ class EquipoListoNotification extends Notification
     {
         $canales = ['database'];
 
-        if (! empty($notifiable->cliente?->correo_notificacion)) {
-            $canales[] = 'mail';
-        }
+        // El correo se encola por separado; un fallo SMTP no revierte la actualización.
 
         return $canales;
     }

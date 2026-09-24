@@ -1,101 +1,65 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-semibold text-xl text-edessi-800 dark:text-white leading-tight">{{ $cliente->nombre }}</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">C.I. {{ $cliente->ci }}</p>
-            </div>
-            <a href="{{ route('clientes.historial.pdf', $cliente) }}"
-               class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 text-sm">
-                Descargar historial PDF
-            </a>
-        </div>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            {{-- Datos del cliente --}}
-            <div class="bg-white dark:bg-noche-surface dark:border dark:border-noche-border shadow-sm rounded-lg p-6 text-sm dark:text-gray-200">
-                <p><strong>Teléfono:</strong> {{ $cliente->telefono ?? '-' }}</p>
-                <p><strong>Dirección:</strong> {{ $cliente->direccion ?? '-' }}</p>
-                <p><strong>Correo de contacto:</strong> {{ $cliente->correo_notificacion ?? '-' }}</p>
-                <p><strong>Acceso al sistema:</strong> {{ $cliente->usuario ? 'Sí (login: '.$cliente->ci.')' : 'No' }}</p>
-            </div>
-
-            {{-- Historial tipo estado de cuenta, agrupado por mes --}}
-            <div class="bg-white dark:bg-noche-surface dark:border dark:border-noche-border shadow-sm rounded-lg overflow-hidden">
-                <div class="px-6 py-4 border-b dark:border-noche-border">
-                    <h3 class="font-semibold dark:text-white">Historial de reparaciones</h3>
-                </div>
-
-                @forelse ($historialPorMes as $mes => $reparaciones)
-                    <div>
-                        {{-- Encabezado del mes --}}
-                        <div class="bg-gray-50 dark:bg-noche-bg px-6 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase sticky top-0">
-                            {{ ucfirst($mes) }}
-                        </div>
-
-                        {{-- Movimientos de ese mes --}}
-                        @foreach ($reparaciones as $r)
-                            <div x-data="{ abierto: false }" class="border-b dark:border-noche-border last:border-b-0">
-                                <button @click="abierto = !abierto"
-                                        class="w-full flex justify-between items-center px-6 py-3 text-left hover:bg-gray-50 dark:hover:bg-noche-bg transition">
-                                    <div>
-                                        <p class="text-sm font-medium dark:text-white">{{ $r->equipo->tipo }} {{ $r->equipo->marca }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $r->fecha_ingreso->format('d/m/Y') }}</p>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <span class="px-2 py-1 rounded-full text-xs
-                                            {{ $r->estado === 'entregado' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-noche-bg dark:text-acento-500' }}">
-                                            {{ ucfirst($r->estado) }}
-                                        </span>
-                                        <svg :class="abierto ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                {{-- Detalle expandible --}}
-                                <div x-show="abierto" class="px-6 pb-4 text-sm text-gray-700 dark:text-gray-300 space-y-2 bg-gray-50 dark:bg-noche-bg">
-                                    <p><strong>Falla reportada:</strong> {{ $r->falla_reportada }}</p>
-                                    <p><strong>Técnico:</strong> {{ $r->tecnico->nombre ?? 'Sin asignar' }}</p>
-                                    <p><strong>Fecha de entrega:</strong> {{ $r->fecha_entrega ? $r->fecha_entrega->format('d/m/Y') : 'Aún no entregado' }}</p>
-
-                                    @if ($r->observaciones->count())
-                                        <div>
-                                            <strong>Observaciones:</strong>
-                                            <ul class="list-disc list-inside">
-                                                @foreach ($r->observaciones as $obs)
-                                                    <li>{{ $obs->descripcion }} <span class="text-xs text-gray-400 dark:text-gray-500">({{ $obs->created_at->format('d/m/Y') }})</span></li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
-
-                                    @if ($r->repuestos->count())
-                                        <div>
-                                            <strong>Repuestos usados:</strong>
-                                            <ul class="list-disc list-inside">
-                                                @foreach ($r->repuestos as $rep)
-                                                    <li>{{ $rep->nombre }} (cantidad: {{ $rep->pivot->cantidad }})</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
-
-                                    <a href="{{ route('reparaciones.show', $r) }}" class="text-edessi-600 dark:text-edessi-400 text-xs hover:underline inline-block mt-1">
-                                        Ver reparación completa →
-                                    </a>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @empty
-                    <p class="text-gray-500 dark:text-gray-400 text-sm p-6">Este cliente aún no tiene reparaciones registradas.</p>
-                @endforelse
-            </div>
-
-        </div>
-    </div>
+<x-slot name="header">
+<div>
+<span class="eyebrow muted">FICHA DEL CLIENTE</span>
+<h1 style="margin-top:8px">{{ $cliente->nombre }}</h1>
+<p>C.I. {{ $cliente->ci }} · {{ $cliente->telefono ?: 'Sin teléfono registrado' }}</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<a class="btn btn-secondary" href="{{ route('clientes.historial.pdf',$cliente) }}">
+<x-icon name="download"/>Historial PDF</a>@if(auth()->user()->esAdmin())<a class="btn btn-primary" href="{{ route('clientes.edit',$cliente) }}">Editar cliente</a>@endif</div>
+</x-slot>
+<div class="details-grid">
+<div class="stack">
+<section class="panel">
+<div class="panel-head">
+<h2>Equipos del cliente</h2>
+<a class="link" href="{{ route('equipos.create',['cliente_id'=>$cliente->id]) }}">+ Registrar equipo</a>
+</div>
+<div class="panel-body">@forelse($cliente->equipos as $e)<a class="quick-link" href="{{ route('equipos.show',$e) }}">
+<x-icon name="monitor"/>
+<span>{{ $e->tipo }} {{ $e->marca }} {{ $e->modelo }}<small>Serie: {{ $e->numero_serie ?: 'No registrada' }}</small>
+</span>
+<span class="arrow">→</span>
+</a>@empty<div class="empty">El cliente todavía no tiene equipos.</div>@endforelse</div>
+</section>
+<section class="panel">
+<div class="panel-head">
+<h2>Historial de servicios</h2>
+</div>
+<div class="panel-body">@forelse($historialPorMes as $mes=>$servicios)<h3 style="margin-bottom:20px;text-transform:capitalize">{{ $mes }}</h3>@foreach($servicios as $r)<div class="timeline-item">
+<strong>Orden #{{ $r->id }} · {{ $r->equipo->tipo }} {{ $r->equipo->marca }}</strong>
+<p style="margin:8px 0">{{ $r->falla_reportada }}</p>
+<x-status :estado="$r->estado"/>@can('view',$r)<a class="link" style="margin-left:10px" href="{{ route('reparaciones.show',$r) }}">Ver detalle →</a>@endcan<small>{{ $r->fecha_ingreso->format('d/m/Y') }} · {{ $r->tecnico?->nombre??'Sin asignar' }}</small>
+</div>@endforeach @empty<div class="empty">Aún no hay servicios registrados.</div>@endforelse</div>
+</section>
+</div>
+<aside class="stack">
+<section class="panel">
+<div class="panel-head">
+<h2>Información de contacto</h2>
+</div>
+<div class="panel-body">
+<dl class="data-list">
+<div>
+<dt>Teléfono</dt>
+<dd>{{ $cliente->telefono ?: 'No registrado' }}</dd>
+</div>
+<div>
+<dt>Correo de notificaciones</dt>
+<dd>{{ $cliente->correo_notificacion ?: 'No registrado' }}</dd>
+</div>
+<div>
+<dt>Dirección</dt>
+<dd>{{ $cliente->direccion ?: 'No registrada' }}</dd>
+</div>
+<div>
+<dt>Acceso al portal</dt>
+<dd>{{ $cliente->usuario_id?'Cuenta habilitada con C.I.':'Sin cuenta' }}</dd>
+</div>
+</dl>
+</div>
+</section>@if(auth()->user()->esAdmin() && $cliente->equipos->isEmpty())<form method="POST" action="{{ route('clientes.destroy',$cliente) }}" onsubmit="return confirm('¿Eliminar este cliente sin equipos y su cuenta de acceso?')">@csrf @method('DELETE')<button class="btn btn-danger">Eliminar cliente sin equipos</button>
+</form>@endif</aside>
+</div>
 </x-app-layout>

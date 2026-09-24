@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Usuario;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,13 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $identity = trim($this->string('email')->toString());
+        $account = Usuario::where('email', $identity)->first();
+        if (! $account) {
+            $matches = Usuario::where('rol', 'cliente')->whereHas('cliente', fn ($c) => $c->where('correo_notificacion', $identity))->get();
+            $account = $matches->count() === 1 ? $matches->first() : null;
+        }
+        if (! $account || ! Auth::attempt(['email' => $account->email, 'password' => $this->input('password'), 'activo' => true], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

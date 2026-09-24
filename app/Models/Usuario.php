@@ -2,14 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Usuario extends Authenticatable
 {
+    use HasFactory;
     use Notifiable;
+
+    protected function casts(): array
+    {
+        return ['activo' => 'boolean', 'password' => 'hashed'];
+    }
+
+    public function routeNotificationForMail($notification)
+    {
+        return $this->esCliente() ? $this->cliente?->correo_notificacion : $this->email;
+    }
 
     protected $table = 'usuarios';
 

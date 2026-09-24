@@ -1,68 +1,63 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-edessi-800 dark:text-white leading-tight">Registrar cliente</h2>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-noche-surface dark:border dark:border-noche-border shadow-sm rounded-lg p-6">
-
-                @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 rounded">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('clientes.store') }}" method="POST" class="space-y-4" x-data="{ crearAcceso: false, enviando: false }" @submit="enviando = true">
-                    @csrf
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
-                        <input type="text" name="nombre" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">C.I.</label>
-                        <input type="text" name="ci" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
-                        <input type="text" name="telefono" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
-                        <input type="text" name="direccion" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo de contacto (opcional)</label>
-                        <input type="email" name="correo_notificacion" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white"
-                               placeholder="Para avisarle cuando su equipo esté listo">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            No es obligatorio. Si no lo da, igual podrá ver el estado de su equipo ingresando al sistema con su C.I.
-                        </p>
-                    </div>
-
-                    <div class="border-t dark:border-noche-border pt-4">
-                        <label class="flex items-center gap-2 dark:text-gray-200">
-                            <input type="checkbox" name="crear_acceso" value="1">
-                            <span class="text-sm">Crear acceso al sistema para que consulte sus reparaciones</span>
-                        </label>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            El cliente ingresará al sistema con su C.I. como usuario. La contraseña inicial será <code>password</code>, y deberá cambiarla luego.
-                        </p>
-                    </div>
-
-                    <x-boton-enviar texto="Registrar" textoEnviando="Registrando..." />
-                </form>
-
-            </div>
-        </div>
-    </div>
+<x-slot name="header">
+<div>
+<h1>{{ $cliente->exists?'Editar cliente':'Registrar cliente' }}</h1>
+<p>Datos de contacto y acceso al seguimiento.</p>
+</div>
+<a class="btn btn-secondary" href="{{ route('clientes.index') }}">Volver</a>
+</x-slot>
+<div class="form-shell">
+<section class="panel">
+<div class="panel-head">
+<h2>Información del cliente</h2>
+</div>
+<form class="panel-body" method="POST" action="{{ $cliente->exists?route('clientes.update',$cliente):route('clientes.store') }}">@csrf @if($cliente->exists) @method('PATCH') @endif<div class="form-grid">
+<div class="field span-2">
+<label for="nombre">Nombre completo *</label>
+<input id="nombre" name="nombre" type="text" value="{{ old('nombre', $cliente->nombre) }}" required maxlength="255" autocomplete="name">
+</div>
+<div class="field">
+<label for="ci">Cédula de identidad *</label>
+<input id="ci" name="ci" type="text" value="{{ old('ci', $cliente->ci) }}" required maxlength="30">
+</div>
+<div class="field">
+<label for="telefono">Teléfono</label>
+<input id="telefono" name="telefono" type="tel" value="{{ old('telefono', $cliente->telefono) }}"  maxlength="30">
+</div>
+<div class="field">
+<label for="correo_notificacion">Correo para notificaciones</label>
+<input id="correo_notificacion" name="correo_notificacion" type="email" value="{{ old('correo_notificacion', $cliente->correo_notificacion) }}"  maxlength="255">
+</div>
+<div class="field">
+<label for="direccion">Dirección</label>
+<input id="direccion" name="direccion" type="text" value="{{ old('direccion', $cliente->direccion) }}"  maxlength="255">
+</div>@if(auth()->user()->esAdmin())<div class="span-2" x-data="{access:{{ old('crear_acceso',$cliente->usuario_id?1:0)?'true':'false' }}}">
+<label style="display:flex;align-items:center;gap:10px;font-weight:600">
+<input type="checkbox" name="crear_acceso" value="1" x-model="access">{{ $cliente->usuario_id?'Actualizar contraseña de acceso (opcional)':'Crear cuenta para el cliente' }}</label>
+<p class="muted" style="font-size:11px;margin:8px 0 18px">El cliente ingresará con su C.I. y la contraseña que definas. El correo de contacto también puede usarse si identifica una sola cuenta.</p>
+<div class="form-grid" x-show="access">
+<div class="field">
+<label for="password">Contraseña</label>
+<input id="password" name="password" type="password" value="{{ old('password') }}"  minlength="8" autocomplete="new-password">
+</div>
+<div class="field">
+<label for="password_confirmation">Confirmar contraseña</label>
+<input id="password_confirmation" name="password_confirmation" type="password" value="{{ old('password_confirmation') }}"  minlength="8" autocomplete="new-password">
+</div>
+</div>
+@if($cliente->usuario_id)<div class="field" style="margin-top:20px">
+<label for="acceso_activo">Estado de la cuenta</label>
+<select name="acceso_activo" id="acceso_activo">
+<option value="1" @selected(old('acceso_activo',$cliente->usuario->activo)==1)>Activo</option>
+<option value="0" @selected(old('acceso_activo',$cliente->usuario->activo)==0)>Inactivo</option>
+</select>
+</div>@endif
+</div>@else<p class="muted span-2" style="font-size:12px">El administrador puede habilitar una cuenta de acceso. El cliente también puede consultar con su comprobante.</p>@endif</div>
+<div class="form-actions">
+<button class="btn btn-primary">Guardar cliente</button>
+<a class="btn btn-secondary" href="{{ route('clientes.index') }}">Cancelar</a>
+</div>
+</form>
+</section>
+</div>
 </x-app-layout>

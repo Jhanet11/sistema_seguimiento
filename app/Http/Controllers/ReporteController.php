@@ -6,49 +6,44 @@ use App\Models\Reparacion;
 use App\Models\Usuario;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ReporteController extends Controller
 {
-    // Pantalla con filtros
-    public function index()
+    private function consulta(Request $r)
     {
-        $tecnicos = Usuario::where('rol', 'tecnico')->get();
-        return view('reportes.index', compact('tecnicos'));
-    }
-
-    // Genera y descarga el PDF con los filtros aplicados
-    public function generar(Request $request)
-    {
-        $data = $request->validate([
-            'fecha_desde' => 'nullable|date',
-            'fecha_hasta' => 'nullable|date',
-            'tecnico_id' => 'nullable|exists:usuarios,id',
-            'estado' => 'nullable|in:recibido,diagnostico,reparacion,listo,entregado',
-        ]);
-
-        $query = Reparacion::with(['equipo.cliente', 'tecnico']);
-
+        $data = $r->validate(['fecha_desde' => 'nullable|date', 'fecha_hasta' => ['nullable', 'date', ...($r->filled('fecha_desde') ? ['after_or_equal:fecha_desde'] : [])], 'estado' => ['nullable', Rule::in(array_keys(Reparacion::ESTADOS))], 'tecnico_id' => ['nullable', Rule::exists('usuarios', 'id')->where('rol', 'tecnico')]]);
+        $q = Reparacion::with('equipo.cliente', 'tecnico');
+        if ($r->user()->esTecnico()) {
+            $q->where('tecnico_id', $r->user()->id);
+            $data['tecnico_id'] = $r->user()->id;
+        } elseif (! empty($data['tecnico_id'])) {
+            $q->where('tecnico_id', $data['tecnico_id']);
+        }
         if (! empty($data['fecha_desde'])) {
-            $query->whereDate('fecha_ingreso', '>=', $data['fecha_desde']);
+            $q->whereDate('fecha_ingreso', '>=', $data['fecha_desde']);
         }
         if (! empty($data['fecha_hasta'])) {
-            $query->whereDate('fecha_ingreso', '<=', $data['fecha_hasta']);
-        }
-        if (! empty($data['tecnico_id'])) {
-            $query->where('tecnico_id', $data['tecnico_id']);
+            $q->whereDate('fecha_ingreso', '<=', $data['fecha_hasta']);
         }
         if (! empty($data['estado'])) {
-            $query->where('estado', $data['estado']);
+            $q->where('estado', $data['estado']);
         }
 
-        $reparaciones = $query->latest()->get();
+        return [$q, $data];
+    }
 
-        $pdf = Pdf::loadView('reportes.pdf', [
-            'reparaciones' => $reparaciones,
-            'filtros' => $data,
-            'fechaGeneracion' => now(),
-        ]);
+    public function index(Request $request)
+    {
+        [$q,$filtros] = $this->consulta($request);
 
-        return $pdf->download('reporte_reparaciones_'.now()->format('Y-m-d_His').'.pdf');
+        return view('reportes.index', ['reparaciones' => $q->latest('id')->paginate(15)->withQueryString(), 'tecnicos' => Usuario::where('rol', 'tecnico')->orderBy('nombre')->get()]);
+    }
+
+    public function generar(Request $request)
+    {
+        [$q,$filtros] = $this->consulta($request);
+
+        return Pdf::loadView('reportes.pdf', ['reparaciones' => $q->latest('id')->get(), 'filtros' => $filtros, 'fechaGeneracion' => now()])->setPaper('a4', 'landscape')->download('reporte-'.today()->toDateString().'.pdf');
     }
 }

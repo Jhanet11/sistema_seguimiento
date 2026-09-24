@@ -1,60 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EDESSI · Sistema de seguimiento y reparación
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación Laravel para registrar clientes y equipos, gestionar órdenes de servicio y consultar su avance. La versión corregida incorpora los requisitos del documento del proyecto y una interfaz renovada.
 
-## About Laravel
+## Abrir la copia preparada
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+La carpeta de entrega `outputs/sistema_seguimiento` incluye las dependencias, los recursos compilados y una base SQLite de demostración, independiente del proyecto original.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Ejecuta `INICIAR_LOCAL.cmd` dentro de esa carpeta si el servidor no está iniciado.
+2. Abre **http://127.0.0.1:8765**.
+3. Usa una cuenta de demostración:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Rol | Correo o C.I. | Contraseña de demostración |
+| --- | --- | --- |
+| Administrador | admin@edessi.com | DemoEdessi2026! |
+| Técnico | carlos@edessi.com | DemoEdessi2026! |
+| Cliente | 8451236 | DemoEdessi2026! |
 
-## Learning Laravel
+Estas cuentas son solo para la copia local de demostración. No deben utilizarse con datos reales. El servidor local se limita a esta computadora; los QR de esta demo apuntan a `127.0.0.1` y no se abren desde otro dispositivo.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Instalación desde el ZIP o una carpeta sin dependencias
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Requisitos: PHP 8.2 o superior; extensiones PDO, pdo_mysql o pdo_sqlite, mbstring, XML, DOM, fileinfo y GD; Composer. ZIP facilita la instalación. Para volver a compilar la interfaz: Node.js 22.12+ y npm. Los recursos compilados se incluyen en `public/build`.
 
-## Laravel Sponsors
+En XAMPP, habilita `extension=gd` y `extension=zip` en el `php.ini` que indica `php --ini`. El iniciador local agrega GD solo a su proceso, sin cambiar la configuración global.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```powershell
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+```
 
-### Premium Partners
+Configura `.env` antes de migrar. Para SQLite, deja `DB_CONNECTION=sqlite` y crea una base vacía **solo si no existe**:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```powershell
+if (!(Test-Path database/database.sqlite)) { New-Item database/database.sqlite -ItemType File }
+php artisan migrate
+php artisan edessi:admin
+```
 
-## Contributing
+`edessi:admin` solicita nombre, correo y contraseña. `db:seed` no crea cuentas con contraseñas predeterminadas. La demo optativa se instala con `php artisan db:seed --class=DemoSeeder`, únicamente en entorno `local` sin usuarios.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Para MariaDB usa en `.env` los datos reales de una base previamente creada:
 
-## Code of Conduct
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=edessi
+DB_USERNAME=usuario_de_la_base
+DB_PASSWORD=contraseña_de_la_base
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Después ejecuta `php artisan migrate` y `php artisan edessi:admin`. Para arrancar usa `INICIAR_LOCAL.cmd` o `php artisan serve` si PHP ya tiene habilitado GD. En el segundo caso, el puerto predeterminado es 8000.
 
-## Security Vulnerabilities
+## Actualizar una instalación existente
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Respalda la base de datos y conserva su `.env` y `APP_KEY`. Copia los archivos corregidos y `public/build`; luego ejecuta:
 
-## License
+```powershell
+composer install
+php artisan optimize:clear
+php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
---
+No uses `migrate:fresh` ni `DemoSeeder` sobre una base con registros reales. La nueva migración agrega campos, índices, códigos de seguimiento e historial de estados; no elimina registros. Los cambios de estado anteriores a esta actualización no se reconstruyen artificialmente.
+
+## Interfaz y pruebas
+
+```powershell
+npm ci
+npm run build
+php artisan test
+```
+
+La suite usa SQLite en memoria por defecto. También se ejecutó sobre una base MariaDB exclusiva de verificación. Nunca apuntes PHPUnit a una base con información real, ya que usa `RefreshDatabase`.
+
+Para mantener el formato PHP: `php vendor/bin/pint --dirty`.
+
+## Correo y publicación
+
+Por defecto `MAIL_MAILER=log` registra correos sin enviarlos. Para enviarlos configura las variables `MAIL_*` de tu proveedor SMTP y mantén el proceso de cola:
+
+```powershell
+php artisan queue:work --tries=3
+```
+
+El aviso web se guarda de inmediato y el correo se encola. También se encola el correo para clientes con dirección de contacto aunque no tengan cuenta.
+
+En un servidor real, configura `APP_ENV=production`, `APP_DEBUG=false`, `APP_DEMO=false`, HTTPS y `APP_URL` con la dirección pública correcta; el directorio web debe ser `public`. No se ha publicado el sistema en Internet ni configurado un SMTP externo.
+
+Consulta `CAMBIOS_Y_PRUEBAS.md` para ver las correcciones y las decisiones de permisos basadas en la documentación.

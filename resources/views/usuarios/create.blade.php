@@ -1,53 +1,47 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-edessi-800 dark:text-white leading-tight">Crear usuario</h2>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-noche-surface dark:border dark:border-noche-border shadow-sm rounded-lg p-6">
-
-                @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 rounded">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-4" x-data="{ enviando: false }" @submit="enviando = true">
-                    @csrf
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
-                        <input type="text" name="nombre" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo electrónico</label>
-                        <input type="email" name="email" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
-                        <select name="rol" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required>
-                            <option value="tecnico">Técnico</option>
-                            <option value="admin">Administrador</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
-                        <input type="password" name="password" class="mt-1 block w-full rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white" required minlength="6">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mínimo 6 caracteres. El usuario podrá cambiarla luego desde su perfil.</p>
-                    </div>
-
-                    <x-boton-enviar texto="Crear usuario" textoEnviando="Creando..." />
-                </form>
-
-            </div>
-        </div>
-    </div>
+<x-slot name="header">
+<div>
+<h1>{{ $usuario->exists?'Editar usuario':'Crear usuario' }}</h1>
+<p>Administra el acceso del personal de EDESSI.</p>
+</div>
+<a class="btn btn-secondary" href="{{ route('usuarios.index') }}">Volver</a>
+</x-slot>
+<div class="form-shell">
+<section class="panel">
+<div class="panel-head">
+<h2>Cuenta del personal</h2>
+</div>
+<form class="panel-body" method="POST" action="{{ $usuario->exists?route('usuarios.update',$usuario):route('usuarios.store') }}">@csrf @if($usuario->exists) @method('PUT') @endif<div class="form-grid">
+<div class="field span-2">
+<label for="nombre">Nombre completo *</label>
+<input id="nombre" name="nombre" type="text" value="{{ old('nombre', $usuario->nombre) }}" required maxlength="255">
+</div>
+<div class="field">
+<label for="email">Correo electrónico *</label>
+<input id="email" name="email" type="email" value="{{ old('email', $usuario->email) }}" required maxlength="255">
+</div>
+<div class="field">
+<label for="rol">Rol *</label>
+<select name="rol" id="rol" required>
+<option value="tecnico" @selected(old('rol',$usuario->rol)==='tecnico')>Técnico</option>
+<option value="admin" @selected(old('rol',$usuario->rol)==='admin')>Administrador</option>
+</select>
+</div>
+<div class="field">
+<label for="password">Contraseña</label>
+<input id="password" name="password" type="password" value="{{ old('password') }}"  minlength="8" autocomplete="new-password">
+</div>
+<div class="field">
+<label for="password_confirmation">Confirmar contraseña</label>
+<input id="password_confirmation" name="password_confirmation" type="password" value="{{ old('password_confirmation') }}"  minlength="8" autocomplete="new-password">
+</div>
+<p class="muted span-2" style="font-size:12px">Usa al menos 8 caracteres. {{ $usuario->exists?'Deja la contraseña vacía para conservar la actual.':'' }}</p>
+</div>
+<div class="form-actions">
+<button class="btn btn-primary">Guardar usuario</button>
+<a class="btn btn-secondary" href="{{ route('usuarios.index') }}">Cancelar</a>
+</div>
+</form>
+</section>
+</div>
 </x-app-layout>

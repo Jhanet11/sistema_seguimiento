@@ -1,60 +1,51 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-edessi-800 dark:text-white leading-tight">Equipos</h2>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 rounded">{{ session('success') }}</div>
-            @endif
-
-            <div class="bg-white dark:bg-noche-surface dark:border dark:border-noche-border shadow-sm rounded-lg p-6" x-data="{ buscar: '' }">
-
-                <div class="flex justify-between items-center mb-4 gap-4">
-                    @if (!auth()->user()->esCliente())
-                        <a href="{{ route('equipos.create') }}"
-                           class="px-4 py-2 bg-edessi-600 dark:bg-acento-500 text-white rounded hover:bg-edessi-700 dark:hover:opacity-90 whitespace-nowrap transition-all duration-150 hover:shadow-md active:scale-95">
-                            + Registrar equipo
-                        </a>
-                    @endif
-
-                    <input type="text" x-model="buscar" placeholder="Buscar por tipo, marca, cliente..."
-                           class="rounded border-gray-300 dark:bg-noche-bg dark:border-noche-border dark:text-white dark:placeholder-gray-500 text-sm w-full max-w-xs">
-                </div>
-
-                <table class="min-w-full text-sm text-left">
-                    <thead class="border-b dark:border-noche-border">
-                        <tr>
-                            <th class="py-2 pr-4 dark:text-gray-300">#</th>
-                            <th class="py-2 pr-4 dark:text-gray-300">Tipo</th>
-                            <th class="py-2 pr-4 dark:text-gray-300">Marca / Modelo</th>
-                            <th class="py-2 pr-4 dark:text-gray-300">N° Serie</th>
-                            <th class="py-2 pr-4 dark:text-gray-300">Cliente</th>
-                            <th class="py-2 pr-4 dark:text-gray-300">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($equipos as $equipo)
-                            <tr class="border-b dark:border-noche-border"
-                                x-show="$el.innerText.toLowerCase().includes(buscar.toLowerCase())">
-                                <td class="py-2 pr-4 dark:text-gray-200">{{ $equipo->id }}</td>
-                                <td class="py-2 pr-4 dark:text-gray-200">{{ $equipo->tipo }}</td>
-                                <td class="py-2 pr-4 dark:text-gray-200">{{ $equipo->marca }} {{ $equipo->modelo }}</td>
-                                <td class="py-2 pr-4 dark:text-gray-200">{{ $equipo->numero_serie }}</td>
-                                <td class="py-2 pr-4 dark:text-gray-200">{{ $equipo->cliente->nombre ?? '-' }}</td>
-                                <td class="py-2 pr-4">
-                                    <a href="{{ route('equipos.show', $equipo) }}" class="text-edessi-600 dark:text-edessi-400 hover:underline">Ver historial</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="6" class="py-4 text-gray-500 dark:text-gray-400">No hay equipos registrados.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-    </div>
+<x-slot name="header">
+<div>
+<h1>{{ auth()->user()->esCliente()?'Mis equipos':'Equipos' }}</h1>
+<p>Dispositivos registrados y su historial de servicio.</p>
+</div>@if(!auth()->user()->esCliente())<a class="btn btn-primary" href="{{ route('equipos.create') }}">
+<x-icon name="plus"/>Registrar equipo</a>@endif</x-slot>
+<section class="panel">
+<form class="filters">
+<div class="field" style="flex:1">
+<label for="q">Buscar equipo</label>
+<input id="q" name="q" value="{{ request('q') }}" placeholder="Tipo, marca, número de serie o cliente">
+</div>
+<button class="btn btn-primary">
+<x-icon name="search"/>Buscar</button>
+<a class="btn btn-secondary" href="{{ route('equipos.index') }}">Limpiar</a>
+</form>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Equipo</th>
+<th>Número de serie</th>
+<th>Cliente</th>
+<th>Servicios</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody>@forelse($equipos as $e)<tr>
+<td>
+<strong>{{ $e->tipo }} {{ $e->marca }}</strong>
+<small>{{ $e->modelo }}</small>
+</td>
+<td>{{ $e->numero_serie ?: 'No registrado' }}</td>
+<td>{{ $e->cliente->nombre }}</td>
+<td>{{ $e->reparaciones_count }}</td>
+<td>
+<a class="link" href="{{ route('equipos.show',$e) }}">Ver equipo →</a>
+</td>
+</tr>@empty<tr>
+<td colspan="5">
+<div class="empty">
+<x-icon name="monitor"/>
+<strong>No hay equipos para mostrar</strong>Los dispositivos registrados aparecerán aquí.</div>
+</td>
+</tr>@endforelse</tbody>
+</table>
+</div>
+<div class="table-foot">{{ $equipos->links() }}</div>
+</section>
 </x-app-layout>

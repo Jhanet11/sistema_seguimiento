@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body { font-family: sans-serif; font-size: 12px; color: #333; }
-        h1 { font-size: 18px; margin-bottom: 0; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #333; }
+        h1 { color: #173a63; font-size: 18px; margin-bottom: 0; }
         .subtitulo { color: #666; margin-top: 4px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; font-size: 11px; }
-        th { background-color: #f2f2f2; }
+        th, td { border: 1px solid #dbe3ed; padding: 6px 8px; text-align: left; font-size: 11px; }
+        th { background-color: #edf3fa; color: #234369; }
         .filtros { margin-bottom: 15px; font-size: 11px; color: #555; }
         .footer { margin-top: 20px; font-size: 10px; color: #999; }
     </style>
@@ -45,7 +45,7 @@
                     <td>{{ $r->equipo->cliente->nombre ?? '-' }}</td>
                     <td>{{ $r->equipo->tipo }} {{ $r->equipo->marca }}</td>
                     <td>{{ $r->tecnico->nombre ?? 'Sin asignar' }}</td>
-                    <td>{{ ucfirst($r->estado) }}</td>
+                    <td>{{ \App\Models\Reparacion::ESTADOS[$r->estado] }}</td>
                     <td>{{ $r->fecha_ingreso->format('d/m/Y') }}</td>
                     <td>{{ $r->fecha_entrega ? $r->fecha_entrega->format('d/m/Y') : '-' }}</td>
                 </tr>
